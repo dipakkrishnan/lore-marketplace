@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/dipakkrishnan/lore-marketplace/main/schema.json",
+  "title": "Lore marketplace",
+  "type": "object",
+  "required": ["version", "name", "sellers"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "sellers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/seller" }
+    }
+  },
+  "$defs": {
+    "seller": {
+      "type": "object",
+      "required": ["name", "node", "store", "network", "topics", "publications", "price_usd", "listed"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 80, "description": "Display name the seller chose." },
+        "node": { "type": "string", "pattern": "^https://[^/\\s]+/mcp$", "description": "The node's MCP endpoint. Agents call discover here, free." },
+        "store": { "type": "string", "pattern": "^https://", "description": "The page a person sees." },
+        "network": { "type": "string", "pattern": "^eip155:[0-9]+$", "description": "CAIP-2 chain id payments settle on. eip155:8453 is Base; eip155:84532 is Base Sepolia, play money." },
+        "topics": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "Topic names as the node's discover reports them." },
+        "publications": { "type": "integer", "minimum": 0 },
+        "price_usd": { "type": "number", "minimum": 0, "description": "Price of one publication read." },
+        "answer_price_usd": { "type": "number", "minimum": 0, "description": "Price of one answer from the owner's proxy, when offered." },
+        "listed": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
+      }
+    }
+  }
+}

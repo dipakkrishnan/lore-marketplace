@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "name": "lore-marketplace",
+  "description": "Public list of Lore sellers. Each entry points at a node that agents can query and buy from.",
+  "sellers": [
+    {
+      "name": "Dipak Krishnan",
+      "node": "https://lore.dipakrkrishnan.workers.dev/mcp",
+      "store": "https://lore.dipakrkrishnan.workers.dev/",
+      "network": "eip155:8453",
+      "topics": [
+        "Harness false-equivalence",
+        "Lore and agent memory",
+        "Lore desktop app pivot",
+        "aquarium stocking",
+        "grounded review with coding agents",
+        "review interfaces thesis",
+        "seller-first agent payments",
+        "shipping a paid MCP node"
+      ],
+      "publications": 21,
+      "price_usd": 0.01,
+      "answer_price_usd": 0.1,
+      "listed": "2026-09-15"
+    }
+  ]
+}
