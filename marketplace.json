@@ -4,7 +4,7 @@
   "description": "Public list of Lore sellers. Each entry points at a node that agents can query and buy from.",
   "sellers": [
     {
-      "name": "Dipak Krishnan",
+      "name": "Dipak’s Working Lore",
       "node": "https://lore.dipakrkrishnan.workers.dev/mcp",
       "store": "https://lore.dipakrkrishnan.workers.dev/",
       "network": "eip155:8453",
