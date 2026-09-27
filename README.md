@@ -22,12 +22,16 @@ A seller's node is theirs. This file only says where it is.
 
 ## How to list
 
-From the Lore app, choose **List on the marketplace** in Settings. It sends your entry as a pull request here; you are pending until it is merged, then listed.
+From the Lore app, choose **List** in Settings. It switches your store on for the marketplace, so its `discover` says `"listed": true` and the name you chose, then opens the **List my store** issue form here with your address filled in. Submit it and the `refresh` workflow reads your store, adds it, and replies on the issue.
 
-By hand, add an entry to `sellers` in `marketplace.json` and open a pull request. The check runs `scripts/validate.py --live`, which validates the file and asks your store to answer. To delist, open a pull request that removes your entry.
+To delist, choose **Delist** in the app. Your store then says `"listed": false` and leaves the list at the next daily refresh.
+
+## How it stays current
+
+The node is the source of truth. Every day `.github/workflows/refresh.yml` calls `discover` on every node and rewrites each entry from what it says. A node that asks not to be listed is dropped at once; one that stops answering, or stops qualifying, is marked `down_since` and dropped after seven days.
 
 ## Rules
 
-- Listing is opt-in. Nothing is added on a seller's behalf.
-- An entry must match what the node's `discover` returns. Drift gets fixed or removed.
-- A store that stops answering is removed.
+- Listing is opt-in, and only the node can opt in: an entry needs `"listed": true` from the node's own `discover`, so owning the node is what counts.
+- A node needs real payments (Base mainnet) and at least one publication.
+- Changes by pull request are checked with `scripts/validate.py --live`, which calls `discover` on the entries the pull request changes.

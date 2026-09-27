@@ -28,7 +28,8 @@
         "publications": { "type": "integer", "minimum": 0 },
         "price_usd": { "type": "number", "minimum": 0, "description": "Price of one publication read." },
         "answer_price_usd": { "type": "number", "minimum": 0, "description": "Price of one answer from the owner's proxy, when offered." },
-        "listed": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
+        "listed": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "down_since": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "First day the node did not answer or stopped qualifying; the entry is dropped seven days later." }
       }
     }
   }

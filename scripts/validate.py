@@ -1,19 +1,82 @@
 #!/usr/bin/env python3
-"""Check marketplace.json. Standard library only. `--live` also asks each store to answer."""
+"""Check marketplace.json. Standard library only. `--live BASE` also asks each entry that differs from BASE's copy to answer discover."""
 from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+FILE = ROOT / "marketplace.json"
 REQUIRED = ["name", "node", "store", "network", "topics", "publications", "price_usd", "listed"]
-OPTIONAL = ["answer_price_usd"]
+OPTIONAL = ["answer_price_usd", "down_since"]
 NODE = re.compile(r"^https://[^/\s]+/mcp$")
 NETWORK = re.compile(r"^eip155:[0-9]+$")
 DATE = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+MAINNET = "eip155:8453"
+
+
+class OptedOut(ValueError):
+    """The node answered and said not to list it."""
+
+
+class Node:
+    """One seller's node, read over MCP the way an agent reads it."""
+
+    def __init__(self, url: str):
+        self.url = url
+
+    def _post(self, message: dict, session: str | None = None):
+        headers = {"Accept": "application/json, text/event-stream", "Content-Type": "application/json", "User-Agent": "lore-marketplace"}
+        if session:
+            headers["Mcp-Session-Id"] = session
+        return urllib.request.urlopen(urllib.request.Request(self.url, json.dumps(message).encode(), headers), timeout=20)
+
+    @staticmethod
+    def _payload(response) -> dict:
+        text = response.read().decode()
+        if "text/event-stream" in response.headers.get("Content-Type", ""):
+            text = next(line[6:] for line in text.splitlines() if line.startswith("data: "))
+        return json.loads(text)
+
+    def discover(self) -> dict:
+        hello = {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "lore-marketplace", "version": "1"}}
+        with self._post({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": hello}) as r:
+            session = r.headers["Mcp-Session-Id"]
+            self._payload(r)
+        self._post({"jsonrpc": "2.0", "method": "notifications/initialized"}, session).close()
+        with self._post({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "discover", "arguments": {}}}, session) as r:
+            return json.loads(self._payload(r)["result"]["content"][0]["text"])
+
+    def entry(self) -> dict:
+        """The entry this node earns today, every field from its own discover. Raises ValueError with a plain reason when it earns none."""
+        try:
+            m = self.discover()
+        except Exception as e:  # noqa: BLE001
+            raise ValueError(f"your store did not answer ({e})") from e
+        if m.get("listed") is False:
+            raise OptedOut("your store asked not to be listed")
+        if m.get("listed") is not True or not str(m.get("name", "")).strip():
+            raise ValueError("your store has not been switched on for the marketplace. Choose List in Settings in the Lore app")
+        if m.get("network") != MAINNET:
+            raise ValueError("your store takes test payments only")
+        if not m.get("publication_count"):
+            raise ValueError("your store has no publications yet")
+        entry = {
+            "name": m["name"].strip()[:80],
+            "node": self.url,
+            "store": self.url.removesuffix("mcp"),
+            "network": m["network"],
+            "topics": sorted(m["topics"]),
+            "publications": m["publication_count"],
+            "price_usd": m["price_usd"],
+        }
+        if isinstance(m.get("answer_price_usd"), (int, float)):
+            entry["answer_price_usd"] = m["answer_price_usd"]
+        return entry
 
 
 def check(data: dict) -> list[str]:
@@ -54,30 +117,35 @@ def check(data: dict) -> list[str]:
         for key in ("price_usd", "answer_price_usd"):
             if key in s and (not isinstance(s[key], (int, float)) or s[key] < 0):
                 errors.append(f"{where}: {key} must be a non-negative number")
-        if not DATE.match(str(s.get("listed", ""))):
-            errors.append(f"{where}: listed must be YYYY-MM-DD")
+        for key in ("listed", "down_since"):
+            if key in s and not DATE.match(str(s[key])):
+                errors.append(f"{where}: {key} must be YYYY-MM-DD")
         if not isinstance(s.get("name"), str) or not 0 < len(s.get("name", "")) <= 80:
             errors.append(f"{where}: name must be 1-80 characters")
     return errors
+
+
+def changed(sellers: list[dict], base: str) -> list[dict]:
+    shown = subprocess.run(["git", "show", f"{base}:marketplace.json"], cwd=ROOT, capture_output=True, text=True)
+    before = json.loads(shown.stdout)["sellers"] if shown.returncode == 0 else []
+    return [s for s in sellers if s not in before]
 
 
 def live(sellers: list[dict]) -> list[str]:
     errors: list[str] = []
     for s in sellers:
         try:
-            with urllib.request.urlopen(urllib.request.Request(s["store"], headers={"User-Agent": "lore-marketplace-validate"}), timeout=15) as r:
-                if r.status != 200:
-                    errors.append(f"{s['node']}: store answered {r.status}")
-        except Exception as e:  # noqa: BLE001
-            errors.append(f"{s['node']}: store did not answer ({e})")
+            Node(s["node"]).entry()
+        except ValueError as e:
+            errors.append(f"{s['node']}: {e}")
     return errors
 
 
 def main() -> int:
-    data = json.loads((ROOT / "marketplace.json").read_text())
+    data = json.loads(FILE.read_text())
     errors = check(data)
     if not errors and "--live" in sys.argv:
-        errors = live(data["sellers"])
+        errors = live(changed(data["sellers"], sys.argv[sys.argv.index("--live") + 1]))
     for e in errors:
         print(f"error: {e}")
     print(f"{len(data.get('sellers', []))} sellers, {len(errors)} errors")
