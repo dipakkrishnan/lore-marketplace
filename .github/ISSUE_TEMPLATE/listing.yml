@@ -1,0 +1,16 @@
+name: List my store
+description: Ask to add your Lore store to the public list of sellers.
+title: List my store
+labels: [listing]
+body:
+  - type: input
+    id: node
+    attributes:
+      label: Store address
+      description: Your store's address ending in /mcp. The Lore app fills this in.
+      placeholder: https://lore.example.workers.dev/mcp
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: A check reads your store and replies here within a few minutes. Your store must be switched on for the marketplace (Settings in the Lore app), take real payments, and have at least one publication.

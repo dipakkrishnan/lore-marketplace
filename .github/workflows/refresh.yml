@@ -1,0 +1,46 @@
+name: refresh
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+  issues:
+    types: [opened]
+concurrency: registry
+permissions:
+  contents: write
+  issues: write
+jobs:
+  refresh:
+    if: github.event_name != 'issues' || contains(github.event.issue.labels.*.name, 'listing')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read every node
+        if: github.event_name != 'issues'
+        run: python3 scripts/refresh.py
+      - name: Read every open request
+        run: |
+          cd "$RUNNER_TEMP" && mkdir completed "not planned"
+          for n in $(gh issue list -R "$GITHUB_REPOSITORY" --label listing --state open --json number --jq '.[].number'); do
+            gh issue view "$n" -R "$GITHUB_REPOSITORY" --json body --jq .body > "$n"
+            if python3 "$GITHUB_WORKSPACE/scripts/refresh.py" --request "$n"; then mv "$n" completed/; else mv "$n" "not planned/"; fi
+          done
+      - name: Commit
+        run: |
+          python3 scripts/validate.py
+          git diff --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -qam "Refresh from each node's discover"
+          git push
+      - name: Reply
+        run: |
+          cd "$RUNNER_TEMP"
+          for reason in completed "not planned"; do
+            for f in "$reason"/*; do
+              [ -e "$f" ] || continue
+              gh issue close "${f#*/}" -R "$GITHUB_REPOSITORY" --reason "$reason" --comment "$(cat "$f")"
+            done
+          done
