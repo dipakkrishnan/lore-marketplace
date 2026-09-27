@@ -2,6 +2,7 @@
 """Rewrite marketplace.json from each node's own discover. With `--request FILE`, first add the node named in that listing request and write the reply to it."""
 from __future__ import annotations
 
+import argparse
 import datetime
 import json
 import re
@@ -56,12 +57,14 @@ class Registry:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--request", metavar="FILE", help="a listing request's body; replaced by the reply")
+    args = parser.parse_args()
     registry = Registry(datetime.date.today())
-    if "--request" in sys.argv:
-        path = sys.argv[sys.argv.index("--request") + 1]
-        with open(path) as handle:
+    if args.request:
+        with open(args.request) as handle:
             ok, reply = registry.request(handle.read())
-        with open(path, "w") as handle:
+        with open(args.request, "w") as handle:
             handle.write(reply + "\n")
         registry.save()
         return 0 if ok else 1

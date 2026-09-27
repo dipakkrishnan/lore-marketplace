@@ -15,19 +15,18 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
-      ISSUE: ${{ github.event.issue.number }}
-      BODY: ${{ github.event.issue.body }}
     steps:
       - uses: actions/checkout@v4
       - name: Read every node
         if: github.event_name != 'issues'
         run: python3 scripts/refresh.py
-      - name: Read the requested node
-        id: request
-        if: github.event_name == 'issues'
+      - name: Read every open request
         run: |
-          printf '%s' "$BODY" > "$RUNNER_TEMP/request"
-          if python3 scripts/refresh.py --request "$RUNNER_TEMP/request"; then echo reason=completed; else echo "reason=not planned"; fi >> "$GITHUB_OUTPUT"
+          cd "$RUNNER_TEMP" && mkdir completed "not planned"
+          for n in $(gh issue list -R "$GITHUB_REPOSITORY" --label listing --state open --json number --jq '.[].number'); do
+            gh issue view "$n" -R "$GITHUB_REPOSITORY" --json body --jq .body > "$n"
+            if python3 "$GITHUB_WORKSPACE/scripts/refresh.py" --request "$n"; then mv "$n" completed/; else mv "$n" "not planned/"; fi
+          done
       - name: Commit
         run: |
           python3 scripts/validate.py
@@ -37,5 +36,11 @@ jobs:
           git commit -qam "Refresh from each node's discover"
           git push
       - name: Reply
-        if: github.event_name == 'issues'
-        run: gh issue close "$ISSUE" --reason "${{ steps.request.outputs.reason }}" --comment "$(cat "$RUNNER_TEMP/request")"
+        run: |
+          cd "$RUNNER_TEMP"
+          for reason in completed "not planned"; do
+            for f in "$reason"/*; do
+              [ -e "$f" ] || continue
+              gh issue close "${f#*/}" -R "$GITHUB_REPOSITORY" --reason "$reason" --comment "$(cat "$f")"
+            done
+          done

@@ -2,6 +2,7 @@
 """Check marketplace.json. Standard library only. `--live BASE` also asks each entry that differs from BASE's copy to answer discover."""
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import subprocess
@@ -142,10 +143,13 @@ def live(sellers: list[dict]) -> list[str]:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--live", metavar="BASE", help="also call discover on entries that differ from BASE")
+    args = parser.parse_args()
     data = json.loads(FILE.read_text())
     errors = check(data)
-    if not errors and "--live" in sys.argv:
-        errors = live(changed(data["sellers"], sys.argv[sys.argv.index("--live") + 1]))
+    if not errors and args.live:
+        errors = live(changed(data["sellers"], args.live))
     for e in errors:
         print(f"error: {e}")
     print(f"{len(data.get('sellers', []))} sellers, {len(errors)} errors")
