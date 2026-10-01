@@ -9,6 +9,7 @@
       "store": "https://lore.dipakrkrishnan.workers.dev/",
       "network": "eip155:8453",
       "topics": [
+        "Conference-specific Deep Review",
         "Harness false-equivalence",
         "Lore and agent memory",
         "Lore desktop app pivot",
@@ -20,7 +21,7 @@
         "seller-first agent payments",
         "shipping a paid MCP node"
       ],
-      "publications": 23,
+      "publications": 24,
       "price_usd": 0.01,
       "answer_price_usd": 0.1,
       "listed": "2026-09-15"
