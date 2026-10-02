@@ -14,6 +14,7 @@
         "Lore and agent memory",
         "Lore desktop app pivot",
         "Precomputed account context",
+        "Project Deep Review Launch",
         "Real-request-path proof",
         "aquarium stocking",
         "grounded review with coding agents",
@@ -21,7 +22,7 @@
         "seller-first agent payments",
         "shipping a paid MCP node"
       ],
-      "publications": 24,
+      "publications": 26,
       "price_usd": 0.01,
       "answer_price_usd": 0.1,
       "listed": "2026-09-15"
