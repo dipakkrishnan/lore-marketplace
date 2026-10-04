@@ -4,7 +4,7 @@ on:
     - cron: "17 6 * * *"
   workflow_dispatch:
   issues:
-    types: [opened]
+    types: [opened, labeled]
 concurrency: registry
 permissions:
   contents: write
