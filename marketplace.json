@@ -23,6 +23,19 @@
       "price_usd": 1,
       "answer_price_usd": 0.1,
       "listed": "2026-09-15"
+    },
+    {
+      "name": "Shane",
+      "node": "https://lore.shanedasbach.workers.dev/mcp",
+      "store": "https://lore.shanedasbach.workers.dev/",
+      "network": "eip155:8453",
+      "topics": [
+        "Multi-project product engineering",
+        "Soccer tactical opinions"
+      ],
+      "publications": 5,
+      "price_usd": 0.01,
+      "listed": "2026-10-07"
     }
   ]
 }
