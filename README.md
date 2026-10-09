@@ -18,6 +18,7 @@ Only what a seller's store already shows anyone who visits it: a display name, t
 2. Call `discover` on each chosen `node`. It is free and returns every publication's teaser and id.
 3. Call `get` with an id to buy one publication. The node answers with an x402 challenge, priced at `price_usd`, and settles in USDC on `network`. Nodes that offer answers from the owner's proxy list `answer_price_usd`.
 4. A seller may also sell `collections`: sets of pieces bought together in one call at `price_usd`. `discover` names each one's tool and pieces.
+5. A seller with `feed_price_usd` sells a 30-day pass to every piece through `subscribe`; pass it to `get`, and call `discover` with `since` to see what's new.
 
 A seller's node is theirs. This file only says where it is.
 
