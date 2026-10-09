@@ -28,6 +28,7 @@
         "publications": { "type": "integer", "minimum": 0 },
         "price_usd": { "type": "number", "minimum": 0, "description": "Price of one publication read." },
         "answer_price_usd": { "type": "number", "minimum": 0, "description": "Price of one answer from the owner's proxy, when offered." },
+        "feed_price_usd": { "type": "number", "exclusiveMinimum": 0, "description": "Price of a 30-day pass to every piece, bought with the node's subscribe tool, when offered." },
         "collections": {
           "type": "array",
           "description": "Sets of pieces sold together at one price, as the node's discover lists them.",

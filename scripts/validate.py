@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 FILE = ROOT / "marketplace.json"
 REQUIRED = ["name", "node", "store", "network", "topics", "publications", "price_usd", "listed"]
-OPTIONAL = ["answer_price_usd", "collections", "down_since"]
+OPTIONAL = ["answer_price_usd", "feed_price_usd", "collections", "down_since"]
 NODE = re.compile(r"^https://[^/\s]+/mcp$")
 NETWORK = re.compile(r"^eip155:[0-9]+$")
 DATE = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
@@ -89,6 +89,10 @@ class Node:
         }
         if isinstance(m.get("answer_price_usd"), (int, float)):
             entry["answer_price_usd"] = m["answer_price_usd"]
+        feed = m.get("feed")
+        price = feed.get("price_usd") if isinstance(feed, dict) else None
+        if isinstance(price, (int, float)) and not isinstance(price, bool) and price > 0:
+            entry["feed_price_usd"] = price
         collections = [
             {"title": c["title"].strip()[:120], "price_usd": c["price_usd"], "pieces": len(c["pieces"])}
             for c in m.get("collections", []) if collection(c)
@@ -136,6 +140,8 @@ def check(data: dict) -> list[str]:
         for key in ("price_usd", "answer_price_usd"):
             if key in s and (not isinstance(s[key], (int, float)) or s[key] < 0):
                 errors.append(f"{where}: {key} must be a non-negative number")
+        if "feed_price_usd" in s and (not isinstance(s["feed_price_usd"], (int, float)) or s["feed_price_usd"] <= 0):
+            errors.append(f"{where}: feed_price_usd must be a positive number")
         if "collections" in s:
             shelf = s["collections"]
             if not isinstance(shelf, list) or not all(
