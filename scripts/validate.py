@@ -13,11 +13,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 FILE = ROOT / "marketplace.json"
 REQUIRED = ["name", "node", "store", "network", "topics", "publications", "price_usd", "listed"]
-OPTIONAL = ["answer_price_usd", "down_since"]
+OPTIONAL = ["answer_price_usd", "collections", "down_since"]
 NODE = re.compile(r"^https://[^/\s]+/mcp$")
 NETWORK = re.compile(r"^eip155:[0-9]+$")
 DATE = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
 MAINNET = "eip155:8453"
+
+
+def collection(c: object) -> bool:
+    return (
+        isinstance(c, dict)
+        and isinstance(c.get("title"), str)
+        and c["title"].strip() != ""
+        and isinstance(c.get("price_usd"), (int, float))
+        and not isinstance(c.get("price_usd"), bool)
+        and c["price_usd"] > 0
+        and isinstance(c.get("pieces"), list)
+    )
 
 
 class OptedOut(ValueError):
@@ -77,6 +89,12 @@ class Node:
         }
         if isinstance(m.get("answer_price_usd"), (int, float)):
             entry["answer_price_usd"] = m["answer_price_usd"]
+        collections = [
+            {"title": c["title"].strip()[:120], "price_usd": c["price_usd"], "pieces": len(c["pieces"])}
+            for c in m.get("collections", []) if collection(c)
+        ] if isinstance(m.get("collections"), list) else []
+        if collections:
+            entry["collections"] = collections
         return entry
 
 
@@ -118,6 +136,17 @@ def check(data: dict) -> list[str]:
         for key in ("price_usd", "answer_price_usd"):
             if key in s and (not isinstance(s[key], (int, float)) or s[key] < 0):
                 errors.append(f"{where}: {key} must be a non-negative number")
+        if "collections" in s:
+            shelf = s["collections"]
+            if not isinstance(shelf, list) or not all(
+                isinstance(c, dict)
+                and set(c) == {"title", "price_usd", "pieces"}
+                and isinstance(c["title"], str) and 0 < len(c["title"]) <= 120
+                and isinstance(c["price_usd"], (int, float)) and c["price_usd"] > 0
+                and isinstance(c["pieces"], int) and c["pieces"] >= 0
+                for c in shelf
+            ):
+                errors.append(f"{where}: collections must be a list of {{title, price_usd > 0, pieces}}")
         for key in ("listed", "down_since"):
             if key in s and not DATE.match(str(s[key])):
                 errors.append(f"{where}: {key} must be YYYY-MM-DD")
