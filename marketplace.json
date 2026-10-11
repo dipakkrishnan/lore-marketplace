@@ -13,13 +13,12 @@
         "Harness false-equivalence",
         "Lore and agent memory",
         "Lore desktop app pivot",
-        "Precomputed account context",
         "Real-request-path proof",
         "grounded review with coding agents",
         "review interfaces thesis",
         "shipping a paid MCP node"
       ],
-      "publications": 14,
+      "publications": 13,
       "price_usd": 1,
       "answer_price_usd": 0.1,
       "listed": "2026-09-15"
