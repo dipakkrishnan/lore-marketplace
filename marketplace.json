@@ -22,7 +22,8 @@
       "publications": 14,
       "price_usd": 1,
       "answer_price_usd": 0.1,
-      "listed": "2026-09-15"
+      "listed": "2026-09-15",
+      "down_since": "2026-10-20"
     },
     {
       "name": "Shane",
