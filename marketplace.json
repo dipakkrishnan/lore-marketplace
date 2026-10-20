@@ -11,6 +11,7 @@
       "topics": [
         "Conference-specific Deep Review",
         "Harness false-equivalence",
+        "Lore V1 failed because the interface didn't fit the user",
         "Lore and agent memory",
         "Lore desktop app pivot",
         "Paid agent boundaries",
@@ -19,11 +20,10 @@
         "review interfaces thesis",
         "shipping a paid MCP node"
       ],
-      "publications": 14,
+      "publications": 16,
       "price_usd": 1,
       "answer_price_usd": 0.1,
-      "listed": "2026-09-15",
-      "down_since": "2026-10-20"
+      "listed": "2026-09-15"
     },
     {
       "name": "Shane",
