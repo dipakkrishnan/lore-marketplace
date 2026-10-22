@@ -9,6 +9,7 @@
       "store": "https://lore.dipakrkrishnan.workers.dev/",
       "network": "eip155:8453",
       "topics": [
+        "Bonaire Open Water diving roll-up: lessons for a future Raja Ampat trip",
         "Conference-specific Deep Review",
         "Harness false-equivalence",
         "Lore V1 failed because the interface didn't fit the user",
@@ -16,11 +17,12 @@
         "Lore desktop app pivot",
         "Paid agent boundaries",
         "Real-request-path proof",
+        "Travel: window seat on United or American; beach trips chosen for diving and poke",
         "grounded review with coding agents",
         "review interfaces thesis",
         "shipping a paid MCP node"
       ],
-      "publications": 16,
+      "publications": 19,
       "price_usd": 1,
       "answer_price_usd": 0.1,
       "listed": "2026-09-15"
