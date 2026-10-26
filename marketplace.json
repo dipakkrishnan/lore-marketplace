@@ -2,6 +2,58 @@
   "version": 1,
   "name": "lore-marketplace",
   "description": "Public list of Lore sellers. Each entry points at a node that agents can query and buy from.",
+  "markets": [
+    {
+      "id": "building-agent-products",
+      "name": "Building products on agents",
+      "tab": "Agents and AI"
+    },
+    {
+      "id": "reviewing-work-with-ai-agents",
+      "name": "Reviewing work with AI agents",
+      "tab": "Agents and AI"
+    },
+    {
+      "id": "evaluating-agent-harnesses",
+      "name": "Evaluating agent harnesses",
+      "tab": "Agents and AI"
+    },
+    {
+      "id": "charging-ai-agents",
+      "name": "Charging AI agents for context",
+      "tab": "Agents and AI"
+    },
+    {
+      "id": "deploying-paid-mcp-servers",
+      "name": "Deploying a paid MCP server",
+      "tab": "Agents and AI"
+    },
+    {
+      "id": "shipping-with-coding-agents",
+      "name": "Shipping software with coding agents",
+      "tab": "Building products"
+    },
+    {
+      "id": "product-pivots",
+      "name": "Pivoting a product people didn't get",
+      "tab": "Building products"
+    },
+    {
+      "id": "learning-to-dive",
+      "name": "Learning to scuba dive",
+      "tab": "Travel"
+    },
+    {
+      "id": "planning-trips",
+      "name": "Planning flights and beach trips",
+      "tab": "Travel"
+    },
+    {
+      "id": "soccer-tactics",
+      "name": "Soccer tactics",
+      "tab": "Sports"
+    }
+  ],
   "sellers": [
     {
       "name": "Dipak’s Working Lore",
@@ -25,7 +77,85 @@
       "publications": 19,
       "price_usd": 1,
       "answer_price_usd": 0.1,
-      "listed": "2026-09-15"
+      "listed": "2026-09-15",
+      "listings": [
+        {
+          "market": "building-agent-products",
+          "piece": "54f3b22c7267a185cd64d124"
+        },
+        {
+          "market": "building-agent-products",
+          "piece": "23525c092236744db5685f81"
+        },
+        {
+          "market": "building-agent-products",
+          "piece": "ae3398fc317ef2d8beb96afa"
+        },
+        {
+          "market": "building-agent-products",
+          "piece": "d4b3d7031b0d61ac895cf99c"
+        },
+        {
+          "market": "reviewing-work-with-ai-agents",
+          "piece": "6b59ea98b178e27180629db8"
+        },
+        {
+          "market": "reviewing-work-with-ai-agents",
+          "piece": "c1d79e7871d599a5883748ca"
+        },
+        {
+          "market": "reviewing-work-with-ai-agents",
+          "piece": "876886fc9505d43c0fc6c355"
+        },
+        {
+          "market": "evaluating-agent-harnesses",
+          "piece": "9ccc82411df573348f0ce5ef"
+        },
+        {
+          "market": "evaluating-agent-harnesses",
+          "piece": "af22ce8bee6d0144058abf81"
+        },
+        {
+          "market": "charging-ai-agents",
+          "piece": "38f18dd97c3bbfcd57dcd348"
+        },
+        {
+          "market": "charging-ai-agents",
+          "piece": "76fbd79df4408efd053668d1"
+        },
+        {
+          "market": "deploying-paid-mcp-servers",
+          "piece": "9f3fcab37a12c6c950b74949"
+        },
+        {
+          "market": "deploying-paid-mcp-servers",
+          "piece": "2b6fcd348b51a194cf2c4e96"
+        },
+        {
+          "market": "shipping-with-coding-agents",
+          "piece": "9875ec0e59834bf93539c706"
+        },
+        {
+          "market": "product-pivots",
+          "piece": "1bdeeb118ba2272448ea23c2"
+        },
+        {
+          "market": "product-pivots",
+          "piece": "3a200b04942a6c7278a15b1d"
+        },
+        {
+          "market": "learning-to-dive",
+          "piece": "2d11690793dac208ec5da7de"
+        },
+        {
+          "market": "learning-to-dive",
+          "piece": "fff411212f0157275f3fbb59"
+        },
+        {
+          "market": "planning-trips",
+          "piece": "776c8b399f2671f64957d1ad"
+        }
+      ]
     },
     {
       "name": "Shane",
@@ -38,7 +168,29 @@
       ],
       "publications": 5,
       "price_usd": 2,
-      "listed": "2026-10-07"
+      "listed": "2026-10-07",
+      "listings": [
+        {
+          "market": "shipping-with-coding-agents",
+          "piece": "2d4062a73be2a6f1db8a8951"
+        },
+        {
+          "market": "shipping-with-coding-agents",
+          "piece": "d23f33b78a1ed43aa3ee9c11"
+        },
+        {
+          "market": "soccer-tactics",
+          "piece": "310f1d816a8a01875f5b57e6"
+        },
+        {
+          "market": "soccer-tactics",
+          "piece": "be665b19567a9466367c4c5e"
+        },
+        {
+          "market": "soccer-tactics",
+          "piece": "ca1397150d0b0c93023ab732"
+        }
+      ]
     }
   ]
 }

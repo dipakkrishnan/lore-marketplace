@@ -14,6 +14,12 @@ GRACE_DAYS = 7
 NODE_IN_TEXT = re.compile(r"https://[^/\s]+/mcp\b")
 
 
+def listings(entry: dict, old: dict, pieces: set[str]) -> dict:
+    """Carry the seller's market listings over, dropping any piece the node no longer sells."""
+    kept = [listing for listing in old.get("listings", []) if listing["piece"] in pieces]
+    return {**entry, "listings": kept} if kept else entry
+
+
 class Registry:
     def __init__(self, today: datetime.date):
         self.data = json.loads(FILE.read_text())
@@ -26,8 +32,9 @@ class Registry:
     def refresh(self) -> None:
         kept = []
         for old in self.sellers:
+            node = Node(old["node"])
             try:
-                kept.append({**Node(old["node"]).entry(), "listed": old["listed"]})
+                kept.append(listings({**node.entry(), "listed": old["listed"]}, old, node.pieces()))
             except OptedOut:
                 pass
             except ValueError:
@@ -41,13 +48,15 @@ class Registry:
         if not found:
             return False, "Not listed: this request has no store address ending in /mcp."
         url = found.group(0)
+        node = Node(url)
         try:
-            entry = Node(url).entry()
+            entry = node.entry()
         except ValueError as e:
             return False, f"Not listed: {e}.\n\nOpen a new request once that changes."
         current = next((i for i, s in enumerate(self.sellers) if s["node"] == url), None)
         if current is not None:
-            self.sellers[current] = {**entry, "listed": self.sellers[current]["listed"]}
+            old = self.sellers[current]
+            self.sellers[current] = listings({**entry, "listed": old["listed"]}, old, node.pieces())
             return True, "Already listed. Your entry now matches your store."
         self.sellers.append({**entry, "listed": self.today.isoformat()})
         return True, "Listed. Buyers can now find your store in the public list of Lore sellers. It stays in step with your store every day."

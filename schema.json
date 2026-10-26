@@ -9,12 +9,27 @@
     "version": { "const": 1 },
     "name": { "type": "string", "minLength": 1 },
     "description": { "type": "string" },
+    "markets": {
+      "type": "array",
+      "description": "The markets buyers browse, each under a tab. Listed by pull request.",
+      "items": { "$ref": "#/$defs/market" }
+    },
     "sellers": {
       "type": "array",
       "items": { "$ref": "#/$defs/seller" }
     }
   },
   "$defs": {
+    "market": {
+      "type": "object",
+      "required": ["id", "name", "tab"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "Stable slug; the market's address." },
+        "name": { "type": "string", "minLength": 1, "maxLength": 60, "description": "What buyers come to the market for." },
+        "tab": { "type": "string", "minLength": 1, "maxLength": 60, "description": "The tab the market is browsed under." }
+      }
+    },
     "seller": {
       "type": "object",
       "required": ["name", "node", "store", "network", "topics", "publications", "price_usd", "listed"],
@@ -29,7 +44,20 @@
         "price_usd": { "type": "number", "minimum": 0, "description": "Price of one publication read." },
         "answer_price_usd": { "type": "number", "minimum": 0, "description": "Price of one answer from the owner's proxy, when offered." },
         "listed": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
-        "down_since": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "First day the node did not answer or stopped qualifying; the entry is dropped seven days later." }
+        "down_since": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "First day the node did not answer or stopped qualifying; the entry is dropped seven days later." },
+        "listings": {
+          "type": "array",
+          "description": "Which of the node's pieces are listed in which market. Kept through each refresh while the node still sells the piece.",
+          "items": {
+            "type": "object",
+            "required": ["market", "piece"],
+            "additionalProperties": false,
+            "properties": {
+              "market": { "type": "string", "description": "A market id." },
+              "piece": { "type": "string", "pattern": "^[0-9a-f]{24}$", "description": "A publication or collection id from the node's discover." }
+            }
+          }
+        }
       }
     }
   }
