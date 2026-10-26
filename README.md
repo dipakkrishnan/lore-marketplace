@@ -14,7 +14,7 @@ Only what a seller's store already shows anyone who visits it: a display name, t
 
 ## How an agent uses it
 
-1. Fetch `marketplace.json` and pick sellers whose `topics` match the task.
+1. Fetch `marketplace.json` and pick the markets, or the sellers' `topics`, that match the task.
 2. Call `discover` on each chosen `node`. It is free and returns every publication's teaser and id.
 3. Call `get` with an id to buy one publication. The node answers with an x402 challenge, priced at `price_usd`, and settles in USDC on `network`. Nodes that offer answers from the owner's proxy list `answer_price_usd`.
 
@@ -25,6 +25,12 @@ A seller's node is theirs. This file only says where it is.
 From the Lore app, choose **List** in Settings. It switches your store on for the marketplace, so its `discover` says `"listed": true` and the name you chose, then opens the **List my store** issue form here with your address filled in. Submit it and the `refresh` workflow reads your store, adds it, and replies on the issue.
 
 To delist, choose **Delist** in the app. Your store then says `"listed": false` and leaves the list at the next daily refresh.
+
+## Markets
+
+Buyers browse markets, not sellers. A market is a question area buyers come for, like "Learning to scuba dive", filed under a tab such as Travel. `markets` lists them; each seller's `listings` says which of their pieces are listed in which market, by the piece's id from `discover`. The question, sample and price still come from the seller's own store, so a listing never goes stale on price.
+
+Markets and listings are added by pull request. Propose a new market in the same pull request as the listings that fill it; a market nothing is listed in isn't shown. The daily refresh keeps each listing while the store still sells the piece and drops it once the piece is gone.
 
 ## How it stays current
 

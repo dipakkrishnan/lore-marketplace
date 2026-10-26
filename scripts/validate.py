@@ -13,10 +13,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 FILE = ROOT / "marketplace.json"
 REQUIRED = ["name", "node", "store", "network", "topics", "publications", "price_usd", "listed"]
-OPTIONAL = ["answer_price_usd", "down_since"]
+OPTIONAL = ["answer_price_usd", "down_since", "listings"]
 NODE = re.compile(r"^https://[^/\s]+/mcp$")
 NETWORK = re.compile(r"^eip155:[0-9]+$")
 DATE = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+MARKET_ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+PIECE_ID = re.compile(r"^[0-9a-f]{24}$")
 MAINNET = "eip155:8453"
 
 
@@ -43,6 +45,8 @@ class Node:
             text = next(line[6:] for line in text.splitlines() if line.startswith("data: "))
         return json.loads(text)
 
+    manifest: dict = {}
+
     def discover(self) -> dict:
         hello = {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "lore-marketplace", "version": "1"}}
         with self._post({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": hello}) as r:
@@ -55,7 +59,7 @@ class Node:
     def entry(self) -> dict:
         """The entry this node earns today, every field from its own discover. Raises ValueError with a plain reason when it earns none."""
         try:
-            m = self.discover()
+            m = self.manifest = self.discover()
         except Exception as e:  # noqa: BLE001
             raise ValueError(f"your store did not answer ({e})") from e
         if m.get("listed") is False:
@@ -79,6 +83,11 @@ class Node:
             entry["answer_price_usd"] = m["answer_price_usd"]
         return entry
 
+    def pieces(self) -> set[str]:
+        """Ids of everything the node sold at its last discover, collections included."""
+        topics = self.manifest.get("topics", {})
+        return {e["id"] for entries in topics.values() for e in entries} | {c["id"] for c in self.manifest.get("collections", [])}
+
 
 def check(data: dict) -> list[str]:
     errors: list[str] = []
@@ -86,6 +95,21 @@ def check(data: dict) -> list[str]:
         errors.append("version must be 1")
     if not isinstance(data.get("name"), str) or not data["name"]:
         errors.append("name must be a non-empty string")
+    markets = data.get("markets", [])
+    if not isinstance(markets, list):
+        return errors + ["markets must be a list"]
+    ids: set[str] = set()
+    for i, m in enumerate(markets):
+        where = f"markets[{i}]"
+        if not isinstance(m, dict) or set(m) != {"id", "name", "tab"}:
+            errors.append(f"{where}: must have exactly id, name and tab")
+            continue
+        if not MARKET_ID.match(str(m["id"])) or m["id"] in ids:
+            errors.append(f"{where}: id must be a unique lowercase-hyphenated slug")
+        ids.add(m["id"])
+        for key in ("name", "tab"):
+            if not isinstance(m[key], str) or not 0 < len(m[key].strip()) <= 60:
+                errors.append(f"{where}: {key} must be 1-60 characters")
     sellers = data.get("sellers")
     if not isinstance(sellers, list):
         return errors + ["sellers must be a list"]
@@ -123,6 +147,24 @@ def check(data: dict) -> list[str]:
                 errors.append(f"{where}: {key} must be YYYY-MM-DD")
         if not isinstance(s.get("name"), str) or not 0 < len(s.get("name", "")) <= 80:
             errors.append(f"{where}: name must be 1-80 characters")
+        listings = s.get("listings", [])
+        if not isinstance(listings, list):
+            errors.append(f"{where}: listings must be a list")
+            continue
+        pairs: set[tuple] = set()
+        for j, listing in enumerate(listings):
+            at = f"{where}.listings[{j}]"
+            if not isinstance(listing, dict) or set(listing) != {"market", "piece"}:
+                errors.append(f"{at}: must have exactly market and piece")
+                continue
+            if listing["market"] not in ids:
+                errors.append(f"{at}: no market {listing['market']!r}")
+            if not PIECE_ID.match(str(listing["piece"])):
+                errors.append(f"{at}: piece must be a 24-character id from the node's discover")
+            pair = (listing["market"], listing["piece"])
+            if pair in pairs:
+                errors.append(f"{at}: listed twice")
+            pairs.add(pair)
     return errors
 
 
@@ -135,10 +177,15 @@ def changed(sellers: list[dict], base: str) -> list[dict]:
 def live(sellers: list[dict]) -> list[str]:
     errors: list[str] = []
     for s in sellers:
+        node = Node(s["node"])
         try:
-            Node(s["node"]).entry()
+            node.entry()
         except ValueError as e:
             errors.append(f"{s['node']}: {e}")
+            continue
+        for listing in s.get("listings", []):
+            if listing["piece"] not in node.pieces():
+                errors.append(f"{s['node']}: piece {listing['piece']} isn't in this store's discover")
     return errors
 
 
