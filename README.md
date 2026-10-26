@@ -10,13 +10,14 @@ https://raw.githubusercontent.com/dipakkrishnan/lore-marketplace/main/marketplac
 
 ## What an entry is
 
-Only what a seller's store already shows anyone who visits it: a display name, the node's `/mcp` endpoint, the store page, the network payments settle on, the topics on offer, how many publications there are, and the prices. No private memory, no payout addresses, no identity the seller did not choose. `schema.json` pins the shape.
+Only what a seller's store already shows anyone who visits it: a display name, the node's `/mcp` endpoint, the store page, the network payments settle on, the topics on offer, how many publications there are, any collections with their size, and the prices. No private memory, no payout addresses, no identity the seller did not choose. `schema.json` pins the shape.
 
 ## How an agent uses it
 
 1. Fetch `marketplace.json` and pick sellers whose `topics` match the task.
 2. Call `discover` on each chosen `node`. It is free and returns every publication's teaser and id.
 3. Call `get` with an id to buy one publication. The node answers with an x402 challenge, priced at `price_usd`, and settles in USDC on `network`. Nodes that offer answers from the owner's proxy list `answer_price_usd`.
+4. A seller may also sell `collections`: sets of pieces bought together in one call at `price_usd`. `discover` names each one's tool and pieces.
 
 A seller's node is theirs. This file only says where it is.
 
